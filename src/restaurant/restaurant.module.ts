@@ -15,5 +15,6 @@ import { RestaurantSchema } from './schema/restaurant.schema';
   ],
   controllers: [RestaurantController],
   providers: [RestaurantService],
+  exports: [MongooseModule],
 })
 export class RestaurantModule {}
