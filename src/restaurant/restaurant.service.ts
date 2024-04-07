@@ -13,4 +13,8 @@ export class RestaurantService {
   async findAll(): Promise<Restaurant[]> {
     return await this.restaurantModel.find();
   }
+
+  async create(restaurant: Restaurant): Promise<Restaurant> {
+    return await this.restaurantModel.create(restaurant);
+  }
 }
