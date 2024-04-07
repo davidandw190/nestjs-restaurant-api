@@ -1,4 +1,4 @@
-import { Schema, Prop, SchemaFactory } from '@nestjs/mogoose';
+import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { Category } from '../enums/category.enum';
 
 @Schema({ timestamps: true })
