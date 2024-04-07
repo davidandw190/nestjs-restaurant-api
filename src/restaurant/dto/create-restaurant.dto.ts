@@ -37,8 +37,4 @@ export class CreateRestaurantDTO {
   @IsNotEmpty({ message: 'Category is required' })
   @IsEnum(Category, { message: 'Invalid category' })
   readonly category: Category;
-
-  constructor(partial: Partial<CreateRestaurantDTO>) {
-    Object.assign(this, partial);
-  }
 }
