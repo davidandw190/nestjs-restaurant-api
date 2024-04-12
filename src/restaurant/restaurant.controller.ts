@@ -38,10 +38,6 @@ export class RestaurantController {
   ): Promise<Restaurant> {
     await this.restaurantService.findById(restaurantId);
 
-    // TODO check if the restaurant is owned by the user updating it
-
-    // TODO check if the restaurant is actualy updated to avoid db call
-
     return this.restaurantService.updateById(restaurantId, restaurant);
   }
 }

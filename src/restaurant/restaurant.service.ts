@@ -17,11 +17,12 @@ export class RestaurantService {
   ) {}
 
   async findAll(): Promise<Restaurant[]> {
-    return await this.restaurantModel.find();
+    return await this.restaurantModel.find().exec();
   }
 
   async create(restaurant: CreateRestaurantDTO): Promise<Restaurant> {
-    return await this.restaurantModel.create(restaurant);
+    const createdRestaurant = new this.restaurantModel(restaurant);
+    return createdRestaurant.save();
   }
 
   async findById(restaurantId: string): Promise<Restaurant> {
@@ -54,13 +55,17 @@ export class RestaurantService {
       );
     }
 
-    return await this.restaurantModel.findByIdAndUpdate(
-      restaurantId,
-      restaurant,
-      {
+    const updatedRestaurant = await this.restaurantModel
+      .findByIdAndUpdate(restaurantId, restaurant, {
         new: true,
         runValidators: true,
-      },
-    );
+      })
+      .exec();
+
+    if (!updatedRestaurant) {
+      throw new NotFoundException('Restaurant not found.');
+    }
+
+    return updatedRestaurant;
   }
 }
