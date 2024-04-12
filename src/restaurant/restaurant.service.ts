@@ -68,4 +68,12 @@ export class RestaurantService {
 
     return updatedRestaurant;
   }
+
+  async deleteById(restaurantId: string): Promise<{ deleted: boolean }> {
+    const { deletedCount } = await this.restaurantModel
+      .deleteOne({ _id: restaurantId })
+      .exec();
+
+    return { deleted: deletedCount === 1 };
+  }
 }
