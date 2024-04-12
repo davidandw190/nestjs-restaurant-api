@@ -8,6 +8,7 @@ import mongoose from 'mongoose';
 import { Restaurant } from './schema/restaurant.schema';
 import { CreateRestaurantDTO } from './dto/create-restaurant.dto';
 import { UpdateRestaurantDTO } from './dto/update-restaurant.dto';
+import { Query } from 'express-serve-static-core';
 
 @Injectable()
 export class RestaurantService {
@@ -16,8 +17,24 @@ export class RestaurantService {
     private restaurantModel: mongoose.Model<Restaurant>,
   ) {}
 
-  async findAll(): Promise<Restaurant[]> {
-    return await this.restaurantModel.find().exec();
+  async findAll(query: Query): Promise<Restaurant[]> {
+    const resPerPage = 2;
+    const currentPage = Number(query.page) || 1;
+    const skip = resPerPage * (currentPage - 1);
+
+    const keyword = query.keyword
+      ? {
+          name: {
+            $regex: new RegExp(query.keyword.toString(), 'i'),
+          },
+        }
+      : {};
+
+    return await this.restaurantModel
+      .find({ ...keyword })
+      .limit(resPerPage)
+      .skip(skip)
+      .exec();
   }
 
   async create(restaurant: CreateRestaurantDTO): Promise<Restaurant> {
