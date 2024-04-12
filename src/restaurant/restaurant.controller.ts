@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
 import { RestaurantService } from './restaurant.service';
 import { Restaurant } from './schema/restaurant.schema';
 import { CreateRestaurantDTO } from './dto/create-restaurant.dto';
+import { UpdateRestaurantDTO } from './dto/update-restaurant.dto';
 
 @Controller('restaurants')
 export class RestaurantController {
@@ -23,8 +24,24 @@ export class RestaurantController {
   @Get(':id')
   async getRestaurant(
     @Param('id')
-    id: string,
+    restaurantId: string,
   ): Promise<Restaurant> {
-    return this.restaurantService.findById(id);
+    return this.restaurantService.findById(restaurantId);
+  }
+
+  @Put(':id')
+  async updateRestaurant(
+    @Param('id')
+    restaurantId: string,
+    @Body()
+    restaurant: UpdateRestaurantDTO,
+  ): Promise<Restaurant> {
+    await this.restaurantService.findById(restaurantId);
+
+    // TODO check if the restaurant is owned by the user updating it
+
+    // TODO check if the restaurant is actualy updated to avoid db call
+
+    return this.restaurantService.updateById(restaurantId, restaurant);
   }
 }

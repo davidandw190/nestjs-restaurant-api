@@ -7,6 +7,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
 import { Restaurant } from './schema/restaurant.schema';
 import { CreateRestaurantDTO } from './dto/create-restaurant.dto';
+import { UpdateRestaurantDTO } from './dto/update-restaurant.dto';
 
 @Injectable()
 export class RestaurantService {
@@ -39,5 +40,27 @@ export class RestaurantService {
     }
 
     return restaurant;
+  }
+
+  async updateById(
+    restaurantId: string,
+    restaurant: UpdateRestaurantDTO,
+  ): Promise<Restaurant> {
+    const isValidId = mongoose.isValidObjectId(restaurantId);
+
+    if (!isValidId) {
+      throw new BadRequestException(
+        'Invalid ID format. Please provide a valid ID.',
+      );
+    }
+
+    return await this.restaurantModel.findByIdAndUpdate(
+      restaurantId,
+      restaurant,
+      {
+        new: true,
+        runValidators: true,
+      },
+    );
   }
 }
