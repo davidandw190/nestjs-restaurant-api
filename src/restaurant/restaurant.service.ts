@@ -87,6 +87,14 @@ export class RestaurantService {
   }
 
   async deleteById(restaurantId: string): Promise<{ deleted: boolean }> {
+    const isValidId = mongoose.isValidObjectId(restaurantId);
+
+    if (!isValidId) {
+      throw new BadRequestException(
+        'Invalid ID format. Please provide a valid ID.',
+      );
+    }
+
     const { deletedCount } = await this.restaurantModel
       .deleteOne({ _id: restaurantId })
       .exec();
