@@ -1,7 +1,7 @@
 import nodeGeoCoder, { Options } from 'node-geocoder';
 
 export default class LocationUtils {
-  static async getRestaurantLocation(address) {
+  static async getRestaurantGeoLocation(address) {
     try {
       const options: Options = {
         provider: 'geocodio',

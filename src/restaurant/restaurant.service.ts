@@ -9,6 +9,7 @@ import { Restaurant } from './schema/restaurant.schema';
 import { CreateRestaurantDTO } from './dto/create-restaurant.dto';
 import { UpdateRestaurantDTO } from './dto/update-restaurant.dto';
 import { Query } from 'express-serve-static-core';
+import LocationUtils from './utils/location.utils';
 
 @Injectable()
 export class RestaurantService {
@@ -38,7 +39,16 @@ export class RestaurantService {
   }
 
   async create(restaurant: CreateRestaurantDTO): Promise<Restaurant> {
-    const createdRestaurant = new this.restaurantModel(restaurant);
+    const geoLocation = await LocationUtils.getRestaurantGeoLocation(
+      restaurant.address,
+    );
+
+    const data = Object.assign(restaurant, {
+      location: geoLocation,
+    });
+
+    const createdRestaurant = new this.restaurantModel(data);
+
     return createdRestaurant.save();
   }
 

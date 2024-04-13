@@ -23,6 +23,9 @@ export class Restaurant {
 
   @Prop()
   images?: object[];
+
+  @Prop({ type: Object, ref: 'Location' })
+  location?: Location;
 }
 
 export const RestaurantSchema = SchemaFactory.createForClass(Restaurant);
