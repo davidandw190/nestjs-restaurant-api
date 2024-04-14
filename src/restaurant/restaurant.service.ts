@@ -106,6 +106,16 @@ export class RestaurantService {
       );
     }
 
+    const deletedRestaurant = await this.restaurantModel.findById(restaurantId);
+
+    if (!deletedRestaurant) {
+      throw new NotFoundException('Restaurant not found by given ID');
+    }
+
+    const isImagesDeleted = await this.deleteImages(deletedRestaurant.images);
+
+    if (!isImagesDeleted) return { deleted: false };
+
     const { deletedCount } = await this.restaurantModel
       .deleteOne({ _id: restaurantId })
       .exec();
@@ -138,5 +148,10 @@ export class RestaurantService {
     );
 
     return restaurant;
+  }
+
+  async deleteImages(deletedImages) {
+    if (deletedImages.length === 0) return true;
+    return await ImagesUtils.delete(deletedImages);
   }
 }
