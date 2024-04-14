@@ -1,5 +1,6 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { Category } from '../enums/category.enum';
+import { Location } from './location.schema';
 
 @Schema({ timestamps: true })
 export class Restaurant {

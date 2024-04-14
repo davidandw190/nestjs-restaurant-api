@@ -10,6 +10,7 @@ import { CreateRestaurantDTO } from './dto/create-restaurant.dto';
 import { UpdateRestaurantDTO } from './dto/update-restaurant.dto';
 import { Query } from 'express-serve-static-core';
 import LocationUtils from './utils/location.utils';
+import ImagesUtils from './utils/images.utils';
 
 @Injectable()
 export class RestaurantService {
@@ -110,5 +111,32 @@ export class RestaurantService {
       .exec();
 
     return { deleted: deletedCount === 1 };
+  }
+
+  /**
+   * Uploads images for a restaurant to AWS S3 and updates the restaurant with the uploaded images.
+   * @param {string} restaurantId - The ID of the restaurant.
+   * @param {Express.Multer.File[]} uploadedFiles - An array of image files to be uploaded.
+   * @returns {Promise<Restaurant>} A promise that resolves to the updated restaurant object.
+   */
+  async uploadImages(
+    restaurantId: string,
+    uploadedFiles: Express.Multer.File[],
+  ): Promise<Restaurant> {
+    const exists = await this.restaurantModel.findById(restaurantId);
+
+    if (!exists) {
+      throw new Error(`Restaurant with ID ${restaurantId} not found.`);
+    }
+
+    const images = await ImagesUtils.upload(uploadedFiles);
+
+    const restaurant = await this.restaurantModel.findByIdAndUpdate(
+      restaurantId,
+      { images },
+      { new: true, runValidators: true },
+    );
+
+    return restaurant;
   }
 }
