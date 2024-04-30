@@ -1,0 +1,26 @@
+version: '3.1'
+
+services:
+  db:
+    container_name: prod_mongodb-restataurant-api
+    image: bitnami/mongodb:7.0.9
+    ports:
+      - 27018:27017
+    env_file:
+      - .env.production
+    volumes:
+      - mongodb_data:/bitnami/mongodb/data
+
+  test_db:
+    container_name: test_mongodb-restataurant-api
+    image: bitnami/mongodb:latest
+    ports:
+      - 27019:27017
+    env_file:
+      - .env.dev
+    volumes:
+      - mongodb_test_data:/bitnami/mongodb/data
+
+volumes:
+  mongodb_data:
+  mongodb_test_data:

@@ -63,7 +63,7 @@ export class RestaurantController {
 
   @Put('upload/:id')
   @UseInterceptors(FilesInterceptor('files'))
-  async uploadFiles(
+  async uploadImages(
     @Param('id') restaurantId: string,
     @UploadedFiles() files: Array<Express.Multer.File>,
   ) {
