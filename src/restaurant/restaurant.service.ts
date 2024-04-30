@@ -150,7 +150,7 @@ export class RestaurantService {
     return restaurant;
   }
 
-  async deleteImages(deletedImages) {
+  private async deleteImages(deletedImages) {
     if (deletedImages.length === 0) return true;
     return await ImagesUtils.delete(deletedImages);
   }
