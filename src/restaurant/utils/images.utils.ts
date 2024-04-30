@@ -20,7 +20,7 @@ export default class ImagesUtils {
       const fileName = `${splitFile[0]}_${fileStamp}.${splitFile[1]}`;
 
       const params = {
-        Bucket: `${process.env.AWS_S3_BUCKET_NAME}/restaurants`,
+        Bucket: `${process.env.AWS_S3_BUCKET_NAME}/restaurants/images`,
         Key: fileName,
         Body: file.buffer,
       };
