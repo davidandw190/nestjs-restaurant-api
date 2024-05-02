@@ -9,5 +9,5 @@ export class LoginPayloadDto {
   readonly email: string;
 
   @IsNotEmpty({ message: 'Password cannot be empty' })
-  password: string;
+  readonly password: string;
 }
