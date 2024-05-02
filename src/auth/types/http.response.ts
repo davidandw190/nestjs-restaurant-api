@@ -9,7 +9,6 @@ import { HttpStatus } from '@nestjs/common';
 export class HttpResponse<T> {
   constructor(
     public readonly status: HttpStatus,
-    public readonly statusCode: number,
     public readonly message: string,
     public readonly data?: T,
     public readonly _devMessage?: string,
