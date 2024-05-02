@@ -1,24 +1,28 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 
 import { ConfigService } from '@nestjs/config/dist/config.service';
 import { PassportStrategy } from '@nestjs/passport';
 import { Request } from 'express';
 import { TokenPayload } from '../types/jwt-token.payload';
-import { UnauthorizedException } from '@nestjs/common';
 
 /**
- * Strategy to handle access token authentication.
- * This strategy extracts the access token from the request cookies and
+ * Strategy to handle refresh token authentication.
+ * This strategy extracts the refresh token from the request cookies and
  * validates it against the configured secret key and expiration date.
  */
-export class JwtStrategy extends PassportStrategy(Strategy, 'access-token') {
+@Injectable()
+export class RefreshTokenStrategy extends PassportStrategy(
+  Strategy,
+  'refresh-token',
+) {
   constructor(private readonly configService: ConfigService) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
-        (req: Request) => req?.cookies?.access_token,
+        (req: Request) => req.cookies?.refresh_token,
       ]),
       ignoreExpiration: false,
-      secretOrKey: configService.get<string>('ACCESS_TOKEN_SECRET'),
+      secretOrKey: configService.get<string>('REFRESH_TOKEN_SECRET'),
     });
   }
 

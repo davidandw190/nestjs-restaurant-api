@@ -6,19 +6,20 @@ import { Observable } from 'rxjs';
 import { Reflector } from '@nestjs/core';
 
 /**
- * A guard that protects routes by validating the JWT access token provided in the request.
+ * A guard that protects routes by validating the JWT refresh token provided in the request.
  * If the route is marked as public, the guard allows access without token validation.
+ * Otherwise, refresh token validation is performed.
  */
 @Injectable()
-export class AccessTokenGuard extends AuthGuard('access-token') {
+export class RefreshTokenGuard extends AuthGuard('refresh-token') {
   constructor(private readonly reflector: Reflector) {
     super();
   }
 
   /**
-   * Determines whether the current route is accessible without access token validation.
+   * Determines whether the current route is accessible without JWT refresh token validation.
    * If the route is marked as public, access is granted without further validation.
-   * Otherwise, access token validation is performed.
+   * Otherwise, JWT refresh token validation is performed.
    *
    * @param context The execution context.
    * @returns A boolean indicating whether access is granted.
