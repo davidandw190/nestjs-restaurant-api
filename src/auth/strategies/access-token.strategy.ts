@@ -11,7 +11,10 @@ import { UnauthorizedException } from '@nestjs/common';
  * This strategy extracts the access token from the request cookies and
  * validates it against the configured secret key and expiration date.
  */
-export class JwtStrategy extends PassportStrategy(Strategy, 'access-token') {
+export class AccessTokenStrategy extends PassportStrategy(
+  Strategy,
+  'access-token',
+) {
   constructor(private readonly configService: ConfigService) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
