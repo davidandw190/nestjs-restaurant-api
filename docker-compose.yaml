@@ -13,7 +13,7 @@ services:
 
   test_db:
     container_name: test_mongodb-restataurant-api
-    image: bitnami/mongodb:latest
+    image: bitnami/mongodb:7.0.9
     ports:
       - 27019:27017
     env_file:
