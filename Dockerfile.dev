@@ -1,0 +1,12 @@
+# Base Stage
+FROM node:19.6-bullseye-slim AS base
+WORKDIR /usr/src/app
+COPY package*.json ./
+RUN npm install
+
+# Development Stage
+FROM base AS production
+COPY . .
+RUN npm run build
+CMD ["npm", "run", "start:dev"]
+

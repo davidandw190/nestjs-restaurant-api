@@ -1,0 +1,14 @@
+# Base Stage
+FROM node:19.6-bullseye-slim AS base
+WORKDIR /usr/src/app
+COPY package*.json ./
+RUN npm install --only=production
+
+# Production Stage
+FROM base AS production
+ARG NODE_ENV=production
+ENV NODE_ENV=${NODE_ENV}
+COPY . .
+RUN npm run build
+CMD ["npm", "run", "start:prod"]
+
