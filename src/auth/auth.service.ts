@@ -1,20 +1,27 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { LoginPayloadDto } from './dto/login.payload.dto';
-import { Tokens } from './types/jwt-tokens.type';
-import { InjectModel } from '@nestjs/mongoose';
-import { User } from './user/schema/user.schema';
-import { Model } from 'mongoose';
-import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { TokenPayload } from './types/jwt-token.payload';
+
+import {
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
+
 import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
+import { LoginPayloadDto } from './dto/login.payload.dto';
+import { RegistrationPayloadDTO } from './dto/registration.payload.dto';
 import { Response } from 'express';
+import { TokenPayload } from './types/jwt-token.payload';
+import { Tokens } from './types/jwt-tokens.type';
+import { User } from './user/schema/user.schema';
+import { UserService } from './user/user.service';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectModel(User.name)
-    private userModel: Model<User>,
+    private readonly userService: UserService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
   ) {}
@@ -22,36 +29,80 @@ export class AuthService {
   async login(loginPayload: LoginPayloadDto, res: Response): Promise<Tokens> {
     const { email, password } = loginPayload;
 
-    const user = await this.userModel.findOne({ email }).select('+password');
+    try {
+      const user: User = await this.userService.findByEmail(email);
 
-    if (!user) {
-      throw new UnauthorizedException('Invalid credentials.');
+      const passwordMatches = await bcrypt.compare(password, user.password);
+
+      if (!passwordMatches) {
+        throw new UnauthorizedException('Invalid credentials.');
+      }
+
+      const tokens: Tokens = await this.generateTokens(
+        user.id,
+        user.email,
+        user.firstName,
+        user.lastName,
+      );
+
+      res.cookie('refresh_token', tokens.refreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'strict',
+        expires: new Date(
+          Date.now() +
+            this.configService.getOrThrow<number>('REFRESH_TOKEN_EXPIRATION'),
+        ),
+      });
+
+      return { accessToken: tokens.accessToken };
+    } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof UnauthorizedException
+      ) {
+        throw new UnauthorizedException('Invalid credentials.');
+      } else {
+        throw new InternalServerErrorException('An error occurred.');
+      }
     }
+  }
 
-    const passwordMatches = await bcrypt.compare(password, user.password);
+  async register(
+    registerPayload: RegistrationPayloadDTO,
+    res: Response,
+  ): Promise<void> {
+    try {
+      const hashedPassword = await this.hashData(registerPayload.password);
 
-    if (!passwordMatches) {
-      throw new UnauthorizedException('Invalid credentials.');
+      const registeredUser: User = await this.userService.create({
+        ...registerPayload,
+        password: hashedPassword,
+      });
+
+      const tokens: Tokens = await this.generateTokens(
+        registeredUser.id,
+        registeredUser.email,
+        registeredUser.firstName,
+        registeredUser.lastName,
+      );
+
+      res.cookie('refresh_token', tokens.refreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'strict',
+        expires: new Date(
+          Date.now() +
+            this.configService.getOrThrow<number>('REFRESH_TOKEN_EXPIRATION'),
+        ),
+      });
+    } catch (error) {
+      if (error instanceof ConflictException) {
+        throw new UnauthorizedException('Email already exists.');
+      } else {
+        throw new InternalServerErrorException('An error occurred.');
+      }
     }
-
-    const tokens: Tokens = await this.generateTokens(
-      user.id,
-      user.email,
-      user.firstName,
-      user.lastName,
-    );
-
-    res.cookie('refresh_token', tokens.refreshToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'strict',
-      expires: new Date(
-        Date.now() +
-          this.configService.getOrThrow<number>('REFRESH_TOKEN_EXPIRATION'),
-      ),
-    });
-
-    return { accessToken: tokens.accessToken };
   }
 
   private async generateTokens(

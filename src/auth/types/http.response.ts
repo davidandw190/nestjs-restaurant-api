@@ -6,7 +6,7 @@ import { HttpStatus } from '@nestjs/common';
  *
  * @template T The type of data payload included in the response.
  */
-export class HttpResponse<T> {
+export class HttpResponse<T = any> {
   constructor(
     public readonly status: HttpStatus,
     public readonly message: string,

@@ -12,6 +12,7 @@ import { LoginPayloadDto } from './dto/login.payload.dto';
 import { Tokens } from './types/jwt-tokens.type';
 import { HttpResponse } from './types/http.response';
 import { ConfigService } from '@nestjs/config';
+import { RegistrationPayloadDTO } from './dto/registration.payload.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -33,6 +34,19 @@ export class AuthController {
       HttpStatus.OK,
       'Login completed successfully.',
       accessToken,
+    );
+  }
+
+  @Post('register')
+  async register(
+    @Body() registerPayload: RegistrationPayloadDTO,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<HttpResponse> {
+    await this.authService.register(registerPayload, res);
+
+    return new HttpResponse(
+      HttpStatus.CREATED,
+      'Registration completed successfully.',
     );
   }
 }
