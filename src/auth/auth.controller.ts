@@ -15,9 +15,9 @@ import { HttpResponse } from './types/http.response';
 import { ConfigService } from '@nestjs/config';
 import { RegistrationPayloadDTO } from './dto/registration.payload.dto';
 import { PublicResource } from 'src/common/decorators/public-resource.decorator';
-import { FromCurrentUser } from 'src/common/decorators/from-current-user.decorator';
 import { ExtractRefreshToken } from 'src/common/decorators/extract-refresh-token.decorator';
 import { RefreshTokenGuard } from './guards/refresh-token.guard';
+import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -62,7 +62,7 @@ export class AuthController {
   @UseGuards(RefreshTokenGuard)
   @HttpCode(HttpStatus.OK)
   async refreshTokens(
-    @FromCurrentUser('id') userId: number,
+    @CurrentUserId() userId: number,
     @ExtractRefreshToken() refreshToken: string,
   ): Promise<HttpResponse<Tokens>> {
     const accessToken: Omit<Tokens, 'refreshToken'> =
