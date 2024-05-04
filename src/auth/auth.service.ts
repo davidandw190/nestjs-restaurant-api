@@ -66,11 +66,24 @@ export class AuthService {
     }
   }
 
-  async refreshToken(
-    userId: number,
-    refreshToken: string,
-  ): Omit<Tokens, 'refreshToken'> | PromiseLike<Omit<Tokens, 'refreshToken'>> {
-    throw new Error('Method not implemented.');
+  async refreshToken(userId: number): Promise<Omit<Tokens, 'refreshToken'>> {
+    const user: Omit<User, 'password'> =
+      await this.userService.findById(userId);
+
+    const accessToken = await this.generateAccessToken(user);
+
+    return { accessToken };
+  }
+
+  async generateAccessToken(user: Omit<User, 'password'>): Promise<string> {
+    const { id, email, firstName, lastName } = user;
+
+    const jwtPayload = { subject: id, email, firstName, lastName };
+
+    return this.jwtService.signAsync(jwtPayload, {
+      secret: this.configService.getOrThrow<string>('ACCESS_TOKEN_SECRET'),
+      expiresIn: this.configService.getOrThrow<string>('ACCESS_TOKEN_TTL'),
+    });
   }
 
   private async generateTokens(user: Omit<User, 'password'>): Promise<Tokens> {

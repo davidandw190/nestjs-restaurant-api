@@ -15,8 +15,23 @@ export class UserService {
     private userModel: Model<User>,
   ) {}
 
+  async findById(userId: number): Promise<User> {
+    const user = this.userModel
+      .findOne({ id: userId })
+      .select('+password')
+      .exec();
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user;
+  }
+
   async findByEmail(email: string): Promise<User> {
-    const user = this.userModel.findOne({ email }).select('+password').exec();
+    const user = this.userModel
+      .findOne({ email: email })
+      .select('+password')
+      .exec();
     if (!user) {
       throw new NotFoundException('User not found');
     }
