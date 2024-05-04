@@ -11,7 +11,7 @@ import { TokenPayload } from 'src/auth/types/jwt-token.payload';
  * @returns The specified data from the current user's token payload, or the entire
  * payload if no key is provided.
  */
-export const FromCurrentUserDecorator = createParamDecorator(
+export const FromCurrentUser = createParamDecorator(
   (data: keyof TokenPayload | undefined, context: ExecutionContext) => {
     const request = context.switchToHttp().getRequest();
     if (!data) return request.user;

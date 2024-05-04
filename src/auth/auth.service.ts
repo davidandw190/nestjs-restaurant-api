@@ -22,6 +22,9 @@ import { UserService } from './user/user.service';
  */
 @Injectable()
 export class AuthService {
+  refreshToken(userId: number, refreshToken: string): Omit<Tokens, "refreshToken"> | PromiseLike<Omit<Tokens, "refreshToken">> {
+    throw new Error('Method not implemented.');
+  }
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
