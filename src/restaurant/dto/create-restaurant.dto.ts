@@ -1,11 +1,14 @@
 import {
   IsEmail,
+  IsEmpty,
   IsEnum,
   IsNotEmpty,
   IsString,
   Matches,
 } from 'class-validator';
+
 import { Category } from '../enums/category.enum';
+import { User } from 'src/auth/user/schema/user.schema';
 
 /**
  * Data Transfer Object (DTO) for creating a restaurant.
@@ -37,4 +40,7 @@ export class CreateRestaurantDTO {
   @IsNotEmpty({ message: 'Category is required' })
   @IsEnum(Category, { message: 'Invalid category' })
   readonly category: Category;
+
+  @IsEmpty({ message: 'You cannot provide the user ID.' })
+  readonly owner: User;
 }

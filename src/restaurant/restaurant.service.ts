@@ -45,6 +45,7 @@ export class RestaurantService {
     );
 
     const data = Object.assign(restaurant, {
+      owner: restaurant.owner._id,
       location: geoLocation,
     });
 

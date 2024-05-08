@@ -1,11 +1,14 @@
 import {
-  IsString,
-  IsOptional,
   IsEmail,
+  IsEmpty,
   IsEnum,
+  IsOptional,
+  IsString,
   Matches,
 } from 'class-validator';
+
 import { Category } from '../enums/category.enum';
+import { User } from 'src/auth/user/schema/user.schema';
 
 export class UpdateRestaurantDTO {
   @IsOptional()
@@ -33,4 +36,7 @@ export class UpdateRestaurantDTO {
   @IsOptional()
   @IsEnum(Category, { message: 'Invalid category' })
   readonly category: Category;
+
+  @IsEmpty({ message: 'You cannot provide the user ID.' })
+  readonly owner: User;
 }
