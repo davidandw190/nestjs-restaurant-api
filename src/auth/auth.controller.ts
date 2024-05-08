@@ -58,6 +58,7 @@ export class AuthController {
   }
 
   @Post('refresh-token')
+  @PublicResource()
   @UseGuards(RefreshTokenGuard)
   @HttpCode(HttpStatus.OK)
   async refreshTokens(
@@ -70,5 +71,15 @@ export class AuthController {
       'Login completed successfully.',
       accessToken,
     );
+  }
+
+  @Post('logout')
+  @UseGuards(RefreshTokenGuard)
+  @HttpCode(HttpStatus.OK)
+  async logout(
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<HttpResponse> {
+    this.authService.logout(res);
+    return new HttpResponse(HttpStatus.OK, 'Logout completed successfully.');
   }
 }

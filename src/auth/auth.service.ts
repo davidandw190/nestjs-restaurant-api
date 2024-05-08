@@ -28,6 +28,16 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
 
+  /**
+   * Validates user credentials and generates an access tokens and a refresh
+   * token upon successful login. The access token is returned in the response
+   * while the refresh token is set as an Http Only Cookie.
+   *
+   * @param loginPayload The login payload containing email and password.
+   * @param res The response object to set the refresh token cookie.
+   * @returns Tokens object containing only the access token.
+   * @throws UnauthorizedException if credentials are invalid.
+   */
   async login(loginPayload: LoginPayloadDto, res: Response): Promise<Tokens> {
     const { email, password } = loginPayload;
 
@@ -46,6 +56,13 @@ export class AuthService {
     }
   }
 
+  /**
+   * Registers a new user based on the validated registration payload.
+   *
+   * @param registerPayload The registration payload containing user details.
+   * @param res The response object to set the refresh token cookie.
+   * @throws UnauthorizedException if email already exists.
+   */
   async register(
     registerPayload: RegistrationPayloadDTO,
     res: Response,
@@ -66,6 +83,21 @@ export class AuthService {
     }
   }
 
+  /**
+   * Clears the refresh token cookie upon logout.
+   *
+   * @param res The response object to clear the refresh token cookie.
+   */
+  async logout(res: Response) {
+    return res.clearCookie('refresh_token');
+  }
+
+  /**
+   * Generates a new access token with the valid refresh token.
+   *
+   * @param user The user object without the password field.
+   * @returns A new access token.
+   */
   async refreshToken(userId: number): Promise<Omit<Tokens, 'refreshToken'>> {
     const user: Omit<User, 'password'> =
       await this.userService.findById(userId);
@@ -75,7 +107,15 @@ export class AuthService {
     return { accessToken };
   }
 
-  async generateAccessToken(user: Omit<User, 'password'>): Promise<string> {
+  /**
+   * Generates a new access token based on the user's information.
+   *
+   * @param user The user object without the password field.
+   * @returns A new access token.
+   */
+  private async generateAccessToken(
+    user: Omit<User, 'password'>,
+  ): Promise<string> {
     const { id, email, firstName, lastName } = user;
 
     const jwtPayload = { subject: id, email, firstName, lastName };
@@ -86,6 +126,12 @@ export class AuthService {
     });
   }
 
+  /**
+   * Generates access and refresh tokens for the user.
+   *
+   * @param user The user object without the password field.
+   * @returns Tokens containing an access token and a refresh token.
+   */
   private async generateTokens(user: Omit<User, 'password'>): Promise<Tokens> {
     const { id, email, firstName, lastName } = user;
 
@@ -108,6 +154,12 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
+  /**
+   * Attaches the refresh token as an Http Only Cookie in the response.
+   *
+   * @param res The response object to set the cookie.
+   * @param refreshToken The refresh token to be set as a cookie.
+   */
   private setRefreshTokenCookie(res: Response, refreshToken: string): void {
     res.cookie('refresh_token', refreshToken, {
       httpOnly: true,
@@ -119,6 +171,12 @@ export class AuthService {
     });
   }
 
+  /**
+   * Hashes the provided password using bcrypt.
+   *
+   * @param password The password to be hashed.
+   * @returns A hashed password.
+   */
   private hashPassword(password: string): Promise<string> {
     const saltRounds =
       this.configService.get<number>('PASSWORD_SALT_ROUNDS') || 10;
@@ -126,7 +184,10 @@ export class AuthService {
     return bcrypt.hash(password, saltRounds);
   }
 
-  async validatePassword(plainPassword: string, storedPassword: string) {
+  private async validatePassword(
+    plainPassword: string,
+    storedPassword: string,
+  ) {
     const passwordMatches = await bcrypt.compare(plainPassword, storedPassword);
 
     if (!passwordMatches) {
@@ -134,6 +195,13 @@ export class AuthService {
     }
   }
 
+  /**
+   * Handles authentication-related errors and throws appropriate exceptions.
+   *
+   * @param error The error to be handled.
+   * @throws UnauthorizedException if credentials are invalid or email already exists.
+   * @throws InternalServerErrorException if an unexpected error occurs.
+   */
   private handleAuthError(error: Error): void {
     if (
       error instanceof NotFoundException ||
