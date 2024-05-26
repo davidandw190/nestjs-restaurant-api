@@ -7,7 +7,7 @@ import {
   Matches,
 } from 'class-validator';
 
-import { Category } from '../enums/category.enum';
+import { RestaurantCategory } from '../enums/restaurant-category.enum';
 import { User } from 'src/auth/user/schema/user.schema';
 
 export class UpdateRestaurantDTO {
@@ -34,8 +34,8 @@ export class UpdateRestaurantDTO {
   readonly address: string;
 
   @IsOptional()
-  @IsEnum(Category, { message: 'Invalid category' })
-  readonly category: Category;
+  @IsEnum(RestaurantCategory, { message: 'Invalid category' })
+  readonly category: RestaurantCategory;
 
   @IsEmpty({ message: 'You cannot provide the user ID.' })
   readonly owner: User;

@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
-import { Category } from '../enums/category.enum';
 import { Location } from './location.schema';
+import { RestaurantCategory } from '../enums/restaurant-category.enum';
 import { User } from 'src/auth/user/schema/user.schema';
 import mongoose from 'mongoose';
 
@@ -23,7 +23,7 @@ export class Restaurant {
   address: string;
 
   @Prop()
-  category: Category;
+  category: RestaurantCategory;
 
   @Prop()
   images?: object[];
