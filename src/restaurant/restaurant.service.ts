@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
@@ -20,9 +21,9 @@ export class RestaurantService {
   ) {}
 
   async findAll(query: Query): Promise<Restaurant[]> {
-    const resPerPage = 2;
+    const resultsPerPage = 10;
     const currentPage = Number(query.page) || 1;
-    const skip = resPerPage * (currentPage - 1);
+    const skip = resultsPerPage * (currentPage - 1);
 
     const keyword = query.keyword
       ? {
@@ -34,18 +35,21 @@ export class RestaurantService {
 
     return await this.restaurantModel
       .find({ ...keyword })
-      .limit(resPerPage)
+      .limit(resultsPerPage)
       .skip(skip)
       .exec();
   }
 
-  async create(restaurant: CreateRestaurantDTO): Promise<Restaurant> {
+  async create(
+    restaurant: CreateRestaurantDTO,
+    userId: string,
+  ): Promise<Restaurant> {
     const geoLocation = await LocationUtils.getRestaurantGeoLocation(
       restaurant.address,
     );
 
     const data = Object.assign(restaurant, {
-      owner: restaurant.owner._id,
+      owner: userId,
       location: geoLocation,
     });
 
@@ -75,6 +79,7 @@ export class RestaurantService {
   async updateById(
     restaurantId: string,
     restaurant: UpdateRestaurantDTO,
+    userId: string,
   ): Promise<Restaurant> {
     const isValidId = mongoose.isValidObjectId(restaurantId);
 
@@ -83,6 +88,11 @@ export class RestaurantService {
         'Invalid ID format. Please provide a valid ID.',
       );
     }
+
+    const existingRestaurant =
+      await this.restaurantModel.findById(restaurantId);
+
+    this.checkRestaurantOwnership(existingRestaurant, userId);
 
     const updatedRestaurant = await this.restaurantModel
       .findByIdAndUpdate(restaurantId, restaurant, {
@@ -98,7 +108,10 @@ export class RestaurantService {
     return updatedRestaurant;
   }
 
-  async deleteById(restaurantId: string): Promise<{ deleted: boolean }> {
+  async deleteById(
+    restaurantId: string,
+    userId: string,
+  ): Promise<{ deleted: boolean }> {
     const isValidId = mongoose.isValidObjectId(restaurantId);
 
     if (!isValidId) {
@@ -112,6 +125,8 @@ export class RestaurantService {
     if (!deletedRestaurant) {
       throw new NotFoundException('Restaurant not found by given ID');
     }
+
+    this.checkRestaurantOwnership(deletedRestaurant, userId);
 
     const isImagesDeleted = await this.deleteImages(deletedRestaurant.images);
 
@@ -154,5 +169,17 @@ export class RestaurantService {
   private async deleteImages(deletedImages) {
     if (deletedImages.length === 0) return true;
     return await ImagesUtils.delete(deletedImages);
+  }
+
+  private checkRestaurantOwnership(
+    restaurant: Restaurant,
+    userId: string,
+  ): void {
+    const isOwner = restaurant.owner.toString() === userId;
+    if (!isOwner) {
+      throw new UnauthorizedException(
+        'You are not authorized to perform this action.',
+      );
+    }
   }
 }
